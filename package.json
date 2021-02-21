@@ -1,0 +1,24 @@
+{
+  "name": "cdk-app-example",
+  "version": "0.1.0",
+  "bin": {
+    "cdk-provision": "bin/aws-cdk-provision.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.90.1",
+    "jest": "^25.5.0",
+    "aws-cdk": "1.90.1",
+    "typescript": "~3.7.2"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.90.1",
+    "@aws-cdk/aws-cognito": "^1.90.1",
+    "@aws-cdk/aws-iam": "^1.90.1",
+    "@aws-cdk/core": "1.90.1",
+    "@aws-cdk/custom-resources": "^1.90.1"
+  }
+}
