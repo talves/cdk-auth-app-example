@@ -12,7 +12,7 @@ const {
 } = require("@aws-cdk/custom-resources");
 const { PolicyStatement, Effect } = require("@aws-cdk/aws-iam");
 
-class CognitoAuth extends cdk.Construct {
+class CognitoAuthConstruct extends cdk.Construct {
   /**
    * @param {cdk.Construct} scope
    * @param {string} id
@@ -36,6 +36,7 @@ class CognitoAuth extends cdk.Construct {
         username: true,
       },
     });
+    this.userPool = userPool;
 
     // add a client with implicit Grant to get token
     const userPoolClient = userPool.addClient("app-client", {
@@ -78,7 +79,7 @@ class CognitoAuth extends cdk.Construct {
           UserAttributes: [
             { Name: "email", Value: "testuser@somewhere.com" },
             { Name: "email_verified", Value: "True" },
-            { Name: "custom:member_status", Value: "gold_member_status" },
+            { Name: "custom:member_status", Value: "auth_user" },
           ],
           MessageAction: "SUPPRESS",
         },
@@ -99,4 +100,4 @@ class CognitoAuth extends cdk.Construct {
   }
 }
 
-module.exports = { CognitoAuth };
+module.exports = { CognitoAuthConstruct };

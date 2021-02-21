@@ -1,6 +1,7 @@
 const { CfnModuleDefaultVersion } = require("@aws-cdk/core");
 const cdk = require("@aws-cdk/core");
-const { CognitoAuth } = require("./cognito-auth");
+const { CognitoAuthConstruct } = require("./cognito-auth");
+const { LamdaFunctionsConstruct } = require("./lamda-functions");
 
 class ApplicationStack extends cdk.Stack {
   /**
@@ -12,7 +13,11 @@ class ApplicationStack extends cdk.Stack {
     super(scope, id, props);
 
     // Call a custom auth Construct for our app
-    const appCognito = new CognitoAuth(this, "AppCognito");
+    const appCognito = new CognitoAuthConstruct(this, "AppCognito");
+    const { userPool } = appCognito;
+    const lambdas = new LamdaFunctionsConstruct(this, "LambdaFunctions", {
+      userPool,
+    });
   }
 }
 
