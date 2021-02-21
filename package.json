@@ -1,5 +1,5 @@
 {
-  "name": "cdk-app-example",
+  "name": "cdk-auth-app-example",
   "version": "0.1.0",
   "bin": {
     "cdk-provision": "bin/aws-cdk-provision.js"
