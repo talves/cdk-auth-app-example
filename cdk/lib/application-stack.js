@@ -10,7 +10,7 @@ export class ApplicationStack extends cdk.Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    // Call a custom Construct for our app
-    const appCognito = new Backend(this, "AppCognito");
+    // Call a custom auth Construct for our app
+    const appCognito = new CognitoAuth(this, "AppCognito");
   }
 }
