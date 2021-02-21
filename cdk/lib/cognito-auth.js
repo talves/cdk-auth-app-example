@@ -89,10 +89,10 @@ class CognitoAuthConstruct extends cdk.Construct {
       },
     });
 
-    new cdk.CfnOutput(this, "Cognito-Demo-ClientID", {
+    new cdk.CfnOutput(this, "Cognito-ClientID", {
       value: userPoolClient.userPoolClientId,
     });
-    new cdk.CfnOutput(this, "Cognito-Demo-UserPoolID", {
+    new cdk.CfnOutput(this, "Cognito-UserPoolID", {
       value: userPool.userPoolId,
     });
 
