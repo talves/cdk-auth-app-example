@@ -1,7 +1,8 @@
+const { CfnModuleDefaultVersion } = require("@aws-cdk/core");
 const cdk = require("@aws-cdk/core");
 const { CognitoAuth } = require("./cognito-auth");
 
-export class ApplicationStack extends cdk.Stack {
+class ApplicationStack extends cdk.Stack {
   /**
    * @param {cdk.App} scope
    * @param {string} id
@@ -14,3 +15,5 @@ export class ApplicationStack extends cdk.Stack {
     const appCognito = new CognitoAuth(this, "AppCognito");
   }
 }
+
+module.exports = { ApplicationStack };
