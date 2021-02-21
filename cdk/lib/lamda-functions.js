@@ -1,11 +1,11 @@
 const cdk = require("@aws-cdk/core");
-import {
+const {
   LambdaRestApi,
   CfnAuthorizer,
   LambdaIntegration,
   AuthorizationType,
-} from "@aws-cdk/aws-apigateway";
-import { AssetCode, Function, Runtime } from "@aws-cdk/aws-lambda";
+} = require("@aws-cdk/aws-apigateway");
+const { AssetCode, Function, Runtime } = require("@aws-cdk/aws-lambda");
 
 class LamdaFunctionsConstruct extends cdk.Construct {
   /**

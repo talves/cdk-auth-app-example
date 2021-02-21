@@ -36,6 +36,18 @@ test("Test User Created", () => {
   expectCDK(stack).to(haveResource("Custom::AWS"));
 });
 
+test("Create Lambda", () => {
+  // THEN
+  expectCDK(stack).to(haveResource("AWS::Lambda::Function"));
+  expectCDK(stack).to(haveResource("AWS::ApiGateway::RestApi"));
+});
+
+// AWS::Lambda::Permission
+test("Lambda permissions set", () => {
+  // THEN
+  expectCDK(stack).to(haveResource("AWS::Lambda::Permission"));
+});
+
 // test("Empty Stack", () => {
 //   const app = new cdk.App();
 //   // WHEN
