@@ -20,5 +20,10 @@
     "@aws-cdk/aws-iam": "^1.90.1",
     "@aws-cdk/core": "1.90.1",
     "@aws-cdk/custom-resources": "^1.90.1"
-  }
+  },
+  "private": true,
+  "workspaces": [
+    "amplify-client-test",
+    "lambda-functions/**"
+  ]
 }
