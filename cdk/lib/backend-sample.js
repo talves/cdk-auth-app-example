@@ -113,7 +113,7 @@ class BackendStack extends cdk.Stack {
     const preTokenGeneration = new lambda.Function(this, "PreTokenGeneration", {
       runtime: nodeRuntime,
       handler: "index.handler",
-      code: lambda.Code.fromAsset("../lambda/pretokengeneration/dist/src"),
+      code: lambda.Code.fromAsset("../lambda-functions/pretokengeneration"),
       environment: {
         GROUPS_ATTRIBUTE_CLAIM_NAME: groupsAttributeClaimName,
       },
