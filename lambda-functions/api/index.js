@@ -1,5 +1,5 @@
 const { createServer, proxy } = require("aws-serverless-express");
-const { Context } = require("aws-lambda");
+// const { Context } = require("aws-lambda");
 const { expressApp } = require("./express-app");
 
 const server = createServer(expressApp);
