@@ -1,28 +1,38 @@
-const apigateway = require("@aws-cdk/aws-apigateway");
+const {
+  RestApi,
+  LambdaIntegration,
+  CfnAuthorizer,
+  AuthorizationType,
+  CfnMethod,
+} = require("@aws-cdk/aws-apigateway");
 const cdk = require("@aws-cdk/core");
-const dynamodb = require("@aws-cdk/aws-dynamodb");
-const { BillingMode, StreamViewType } = dynamodb;
+const {
+  Table,
+  AttributeType,
+  BillingMode,
+  StreamViewType,
+} = require("@aws-cdk/aws-dynamodb");
 const lambda = require("@aws-cdk/aws-lambda");
-const cognito = require("@aws-cdk/aws-cognito");
 const iam = require("@aws-cdk/aws-iam");
 const s3 = require("@aws-cdk/aws-s3");
 const cloudfront = require("@aws-cdk/aws-cloudfront");
 require("source-map-support/register");
-const { AuthorizationType } = require("@aws-cdk/aws-apigateway");
 const {
+  CfnUserPoolDomain,
+  CfnUserPoolClient,
+  CfnUserPoolIdentityProvider,
+  CfnUserPoolGroup,
   CfnUserPool,
   CfnUserPoolIdentityProvider,
   SignInType,
   UserPool,
   UserPoolAttribute,
 } = require("@aws-cdk/aws-cognito");
-const { Utils } = require("./utils");
-const { Runtime } = require("@aws-cdk/aws-lambda");
-
 const { URL } = require("url");
 const { Duration } = require("@aws-cdk/core");
 const { Bucket } = require("@aws-cdk/aws-s3");
 const { CloudFrontWebDistribution } = require("@aws-cdk/aws-cloudfront");
+const { Utils } = require("./utils");
 
 /**
  * Define a CloudFormation stack that creates a serverless application with
@@ -130,7 +140,7 @@ class BackendStack extends cdk.Stack {
     // - https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-cognito.CfnIdentityPool.html
 
     // high level construct
-    const userPool = new cognito.UserPool(this, id + "Pool", {
+    const userPool = new UserPool(this, id + "Pool", {
       signInType: SignInType.EMAIL,
       autoVerifiedAttributes: [UserPoolAttribute.EMAIL],
       lambdaTriggers: { preTokenGeneration: preTokenGeneration },
@@ -154,12 +164,12 @@ class BackendStack extends cdk.Stack {
     // create two groups, one for admins one for users
     // these groups can be used without configuring a 3rd party IdP
 
-    new cognito.CfnUserPoolGroup(this, "AdminsGroup", {
+    new CfnUserPoolGroup(this, "AdminsGroup", {
       groupName: adminsGroupName,
       userPoolId: userPool.userPoolId,
     });
 
-    new cognito.CfnUserPoolGroup(this, "UsersGroup", {
+    new CfnUserPoolGroup(this, "UsersGroup", {
       groupName: usersGroupName,
       userPoolId: userPool.userPoolId,
     });
@@ -174,20 +184,20 @@ class BackendStack extends cdk.Stack {
     // - https://aws.amazon.com/dynamodb/
     // - https://docs.aws.amazon.com/cdk/api/latest/docs/aws-dynamodb-readme.html
 
-    const itemsTable = new dynamodb.Table(this, "ItemsTable", {
+    const itemsTable = new Table(this, "ItemsTable", {
       // billingMode: BillingMode.PAY_PER_REQUEST,
       billingMode: BillingMode.PROVISIONED,
       serverSideEncryption: true,
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
-      partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: "id", type: AttributeType.STRING },
     });
 
-    const usersTable = new dynamodb.Table(this, "UsersTable", {
+    const usersTable = new Table(this, "UsersTable", {
       // billingMode: BillingMode.PAY_PER_REQUEST,
       billingMode: BillingMode.PROVISIONED,
       serverSideEncryption: true,
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
-      partitionKey: { name: "username", type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: "username", type: AttributeType.STRING },
       timeToLiveAttribute: "ttl",
     });
 
@@ -204,7 +214,7 @@ class BackendStack extends cdk.Stack {
     const apiFunction = new lambda.Function(this, "APIFunction", {
       runtime: nodeRuntime,
       handler: "index.handler",
-      code: lambda.Code.fromAsset("../lambda/api/dist/src"),
+      code: lambda.Code.fromAsset("../lambda/api"),
       timeout: Duration.seconds(30),
       memorySize: lambdaMemory,
       environment: {
@@ -260,7 +270,7 @@ class BackendStack extends cdk.Stack {
 
     const cfnAuthorizer = new apigateway.CfnAuthorizer(this, id, {
       name: "CognitoAuthorizer",
-      type: AuthorizationType.COGNITO,
+      type: apigateway.AuthorizationType.COGNITO,
 
       identitySource: "method.request.header." + authorizationHeaderName,
       restApiId: api.restApiId,
@@ -285,7 +295,7 @@ class BackendStack extends cdk.Stack {
 
     const method = proxyResource.addMethod("ANY", integration, {
       authorizer: { authorizerId: cfnAuthorizer.ref },
-      authorizationType: AuthorizationType.COGNITO,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
     });
 
     // uncomment to use an access token instead of an id token
@@ -314,7 +324,7 @@ class BackendStack extends cdk.Stack {
     let cognitoIdp = undefined;
 
     if (identityProviderMetadataURLOrFile && identityProviderName) {
-      cognitoIdp = new cognito.CfnUserPoolIdentityProvider(this, "CognitoIdP", {
+      cognitoIdp = new CfnUserPoolIdentityProvider(this, "CognitoIdP", {
         providerName: identityProviderName,
         providerDetails: Utils.isURL(identityProviderMetadataURLOrFile)
           ? {
@@ -347,24 +357,20 @@ class BackendStack extends cdk.Stack {
     // See also:
     // - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-client-apps.html
 
-    const cfnUserPoolClient = new cognito.CfnUserPoolClient(
-      this,
-      "CognitoAppClient",
-      {
-        supportedIdentityProviders: supportedIdentityProviders,
-        clientName: "Web",
-        allowedOAuthFlowsUserPoolClient: true,
-        allowedOAuthFlows: ["code"],
-        allowedOAuthScopes: ["phone", "email", "openid", "profile"],
-        explicitAuthFlows: ["ALLOW_REFRESH_TOKEN_AUTH"],
-        preventUserExistenceErrors: "ENABLED",
-        generateSecret: false,
-        refreshTokenValidity: 1,
-        callbackUrLs: [appUrl],
-        logoutUrLs: [appUrl],
-        userPoolId: userPool.userPoolId,
-      }
-    );
+    const cfnUserPoolClient = new CfnUserPoolClient(this, "CognitoAppClient", {
+      supportedIdentityProviders: supportedIdentityProviders,
+      clientName: "Web",
+      allowedOAuthFlowsUserPoolClient: true,
+      allowedOAuthFlows: ["code"],
+      allowedOAuthScopes: ["phone", "email", "openid", "profile"],
+      explicitAuthFlows: ["ALLOW_REFRESH_TOKEN_AUTH"],
+      preventUserExistenceErrors: "ENABLED",
+      generateSecret: false,
+      refreshTokenValidity: 1,
+      callbackUrLs: [appUrl],
+      logoutUrLs: [appUrl],
+      userPoolId: userPool.userPoolId,
+    });
 
     // we want to make sure we do things in the right order
     if (cognitoIdp) {
@@ -380,14 +386,10 @@ class BackendStack extends cdk.Stack {
     // See also:
     // https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-assign-domain.html
 
-    const cfnUserPoolDomain = new cognito.CfnUserPoolDomain(
-      this,
-      "CognitoDomain",
-      {
-        domain: domain,
-        userPoolId: userPool.userPoolId,
-      }
-    );
+    const cfnUserPoolDomain = new CfnUserPoolDomain(this, "CognitoDomain", {
+      domain: domain,
+      userPoolId: userPool.userPoolId,
+    });
 
     // ========================================================================
     // Stack Outputs
