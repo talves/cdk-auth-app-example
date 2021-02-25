@@ -1,0 +1,1 @@
+**[Abandoned]:** Decided to abandon this project for a more complete example (not found yet). This code does have some great references to how to setup using js rather than ts. I'm leaving this code for reference at this time. I like some of the patterns being used by the command line `cdk`.
