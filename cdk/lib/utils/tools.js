@@ -1,6 +1,10 @@
 const aws = require("aws-sdk");
 const { CloudFormation } = require("aws-sdk");
-const apigateway = require("@aws-cdk/aws-apigateway");
+const {
+  /* IResource, */
+  MockIntegration,
+  PassthroughBehavior,
+} = require("@aws-cdk/aws-apigateway");
 const { URL } = require("url");
 
 class Utils {
@@ -26,14 +30,14 @@ class Utils {
   }
 
   static addCorsOptions(
-    apiResource: apigateway.IResource,
+    apiResource /*: IResource */,
     origin,
     allowCredentials: boolean = false,
     allowMethods = "OPTIONS,GET,PUT,POST,DELETE"
   ) {
     apiResource.addMethod(
       "OPTIONS",
-      new apigateway.MockIntegration({
+      new MockIntegration({
         integrationResponses: [
           {
             statusCode: "200",
@@ -50,7 +54,7 @@ class Utils {
             },
           },
         ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        passthroughBehavior: PassthroughBehavior.NEVER,
         requestTemplates: {
           "application/json": '{"statusCode": 200}',
         },
