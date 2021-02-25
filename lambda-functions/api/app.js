@@ -10,7 +10,7 @@ const { eventContext } = require("aws-serverless-express/middleware");
 const { v4: uuid4 } = require("uuid");
 const {
   authorizationMiddleware,
-  ForceSignOutHandler,
+  /* ForceSignOutHandler, */
 } = require("./services/authorizationMiddleware");
 // const {StorageService} = require("./services/storageService")
 // const {Pet} = require("./models/pet")
@@ -109,12 +109,10 @@ class App {
       console.log("post /pets ", typeof pet, pet);
 
       if (pet.id) {
-        res
-          .status(400)
-          .json({
-            error:
-              "POST /pet auto assigns an id. In order to update use PUT /pet",
-          });
+        res.status(400).json({
+          error:
+            "POST /pet auto assigns an id. In order to update use PUT /pet",
+        });
         return;
       }
 
@@ -145,11 +143,9 @@ class App {
         return;
       }
       if (updatedPet.id !== petId) {
-        res
-          .status(400)
-          .json({
-            error: "Invalid request - Pet.id doesn't match request param",
-          });
+        res.status(400).json({
+          error: "Invalid request - Pet.id doesn't match request param",
+        });
         return;
       }
       const existingPet = await opts.storageService.getPet(petId);
